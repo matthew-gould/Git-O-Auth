@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable,
          :omniauthable, omniauth_providers: [:github]
 
-  serialize :github_auth_data, JSON
+  serialize :auth_data, JSON
 
   # def self.from_omniauth auth
   #   email = auth.info.email
@@ -24,10 +24,15 @@ class User < ActiveRecord::Base
     else
       where(github_id: github_id).create! do |u|
         u.password = SecureRandom.hex 64
-        u.name = data.info.name
+        u.name = data.info.nickname
         u.email = data.info.email
         u.github_id = data.uid
+        u.auth_data = data
       end
     end
   end
+
+    # HTTP.get("https://api.github.com/users/#{person}/repos", 
+    # headers: {"Authorization" => "token env.github_token", "User-Agent" => "env.github_name"})
+
 end
