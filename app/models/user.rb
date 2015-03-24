@@ -17,7 +17,17 @@ class User < ActiveRecord::Base
   #   end
   # end
 
-  def self.from_omniauth auth
-    
+  def self.from_omniauth data
+    github_id = data.uid
+    if user = User.find_by(github_id: github_id)
+      user
+    else
+      where(github_id: github_id).create! do |u|
+        u.password = SecureRandom.hex 64
+        u.name = data.info.name
+        u.email = data.info.email
+        u.github_id = data.uid
+      end
+    end
   end
 end
