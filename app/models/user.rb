@@ -7,15 +7,7 @@ class User < ActiveRecord::Base
 
   serialize :auth_data, JSON
 
-  # def self.from_omniauth auth
-  #   email = auth.info.email
-  #   raise "You must sign in with a #{DOMAIN} address" unless email.ends_with? DOMAIN
-  #   where(email: email).first_or_create! do |u|
-  #     u.password = SecureRandom.hex 64
-  #     u.google_auth_id   = auth.id
-  #     u.google_auth_data = auth.to_h
-  #   end
-  # end
+  has_many :repos
 
   def self.from_omniauth data
     github_id = data.uid
@@ -30,9 +22,13 @@ class User < ActiveRecord::Base
         u.auth_data = data
       end
     end
+    repo_list = HTTParty.get("https://api.github.com/users/#{user.name}/repos", 
+    headers: {"Authorization" => "token #{Figaro.env.github_token}", 
+    "User-Agent" => "#{Figaro.env.github_name}"})
+    repo_names = repo_list.map {|x| x["name"]}
+    repo_names.each do |repo|
+      Repo.find_or_create_by!(name: repo, user_id: user.id)
+    end
+    user
   end
-
-    # HTTP.get("https://api.github.com/users/#{person}/repos", 
-    # headers: {"Authorization" => "token env.github_token", "User-Agent" => "env.github_name"})
-
 end
