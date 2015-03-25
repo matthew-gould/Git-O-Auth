@@ -16,6 +16,8 @@ gem 'slim-rails'
 gem 'httparty'
 gem 'omniauth'
 gem 'omniauth-github'
+gem 'sidekiq'
+gem 'sinatra', require: nil
 
 group :development, :test do
   gem 'better_errors'

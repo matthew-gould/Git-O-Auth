@@ -10,6 +10,7 @@ class User < ActiveRecord::Base
   has_many :repos
 
   def self.from_omniauth data
+    # User.where(github_id: data.uid).first_or_create! do |u|
     github_id = data.uid
     if user = User.find_by(github_id: github_id)
       user
@@ -30,5 +31,9 @@ class User < ActiveRecord::Base
       Repo.find_or_create_by!(name: repo, user_id: user.id)
     end
     user
+  end
+
+  def github_token
+    auth_data["credentials"]["token"]
   end
 end
